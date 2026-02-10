@@ -6,10 +6,10 @@ class NewsOracle:
 
     @public
     def verify_news(self, article_text: str, question: str):
-        # این بخش باعث تمایز تو می‌شود؛ استفاده از لایه هوش مصنوعی برای تحلیل متن
+      
         prompt = f"Analyze this text: {article_text}. Answer this: {question}. Respond with one word: YES or NO."
         
-        # فراخوانی AI داخلی جن‌لایر
+       
         response = self.ai_layer.ask(prompt)
         self.consensus_data = response
         return response
