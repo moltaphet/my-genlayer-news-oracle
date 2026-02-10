@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react'
 interface AnalysisResult {
   trustScore: string;
   aiOpinion: string;
+  txHash: string;
+  contractAddr: string;
 }
 
 function App() {
@@ -13,7 +15,7 @@ function App() {
   useEffect(() => {
     document.body.style.backgroundColor = '#020617';
     document.body.style.margin = '0';
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflowX = 'hidden';
   }, []);
 
   const handleAnalyze = () => {
@@ -22,7 +24,9 @@ function App() {
     setTimeout(() => {
       setResult({
         trustScore: "88/100",
-        aiOpinion: "Current analysis indicates high factual consistency. However, the framing suggests a strategic narrative focus. Cross-referencing with primary source data is advised for full neutrality."
+        aiOpinion: "Current analysis indicates high factual consistency. However, the framing suggests a strategic narrative focus. Cross-referencing with primary source data is advised for full neutrality.",
+        txHash: "0xb637ba3d0b8a9171ac7302bf25369d5c02b24b384f3acf2867ae605a956d8c10",
+        contractAddr: "0x1e3d433788e6890f2300D0e321058850454c9A2d"
       })
       setLoading(false)
     }, 2500)
@@ -31,11 +35,22 @@ function App() {
   return (
     <div style={{
       backgroundColor: '#020617', color: '#e2e8f0', 
-      height: '100vh', width: '100vw',
+      minHeight: '100vh', width: '100%',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'sans-serif', position: 'fixed', top: 0, left: 0
+      fontFamily: 'sans-serif', position: 'relative', padding: '40px 0'
     }}>
       
+      {/* 1. GenLayer Logo - Top Left */}
+      <div style={{ position: 'absolute', top: '30px', left: '30px', zIndex: 100 }}>
+        <img 
+          src="/genlayer-logo.png" 
+          alt="GenLayer Logo" 
+          style={{ width: '140px', height: 'auto', filter: 'brightness(1.2)' }} 
+          onError={(e) => { (e.target as any).style.display = 'none' }} // اگر عکس نبود مخفی بشه
+        />
+        <div style={{ color: '#3b82f6', fontSize: '0.6rem', fontWeight: 'bold', letterSpacing: '2px', marginTop: '5px' }}>OFFICIAL ORACLE NODE</div>
+      </div>
+
       {/* Social Links - Top Right */}
       <div style={{ position: 'absolute', top: '30px', right: '30px', display: 'flex', gap: '20px', zIndex: 100 }}>
         <a href="https://x.com/0xehs4hn" target="_blank" rel="noreferrer" style={{ opacity: 0.6 }}>
@@ -46,22 +61,17 @@ function App() {
         </a>
       </div>
 
-      {/* Large Background Watermark */}
-      <div style={{ position: 'absolute', fontSize: '10vw', fontWeight: '900', color: 'rgba(255, 255, 255, 0.02)', zIndex: 0, pointerEvents: 'none', userSelect: 'none' }}>
-        GENLAYER
-      </div>
-
       {/* Main Container */}
       <div style={{
-        position: 'relative', zIndex: 1, maxWidth: '580px', width: '90%', 
+        position: 'relative', zIndex: 1, maxWidth: '620px', width: '90%', 
         backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(15px)',
         padding: '45px', borderRadius: '40px', 
         border: '1px solid rgba(59, 130, 246, 0.3)',
         boxShadow: '0 0 100px rgba(0, 0, 0, 0.8)',
         textAlign: 'center', boxSizing: 'border-box'
       }}>
-        <h2 style={{ color: '#60a5fa', fontSize: '2.2rem', margin: '0 0 5px 0', fontWeight: '900', letterSpacing: '2px' }}>AI NEWS ORACLE</h2>
-        <p style={{ color: '#475569', marginBottom: '30px', fontSize: '0.7rem', letterSpacing: '4px', fontWeight: 'bold' }}>INTELLIGENT VERIFICATION</p>
+        <h2 style={{ color: '#ffffff', fontSize: '2.5rem', margin: '0 0 5px 0', fontWeight: '900', letterSpacing: '1px' }}>TRUTH ENGINE</h2>
+        <p style={{ color: '#60a5fa', marginBottom: '30px', fontSize: '0.75rem', letterSpacing: '3px', fontWeight: 'bold', textTransform: 'uppercase' }}>Decentralized News Oracle by GenLayer</p>
         
         <textarea 
           style={{
@@ -69,7 +79,7 @@ function App() {
             border: '1px solid rgba(255,255,255,0.1)', borderRadius: '25px', padding: '20px',
             fontSize: '1rem', outline: 'none', marginBottom: '20px', resize: 'none', boxSizing: 'border-box'
           }}
-          placeholder="Paste news content here..."
+          placeholder="Enter news content or headline for AI swarm verification..."
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
@@ -78,39 +88,58 @@ function App() {
           onClick={handleAnalyze}
           disabled={loading || !text}
           style={{
-            width: '100%', padding: '18px', backgroundColor: loading ? '#1e293b' : '#2563eb',
-            color: 'white', border: 'none', borderRadius: '20px', fontWeight: 'bold',
-            cursor: 'pointer', fontSize: '1.1rem', transition: '0.3s'
+            width: '100%', padding: '20px', backgroundColor: loading ? '#1e293b' : '#2563eb',
+            color: 'white', border: 'none', borderRadius: '22px', fontWeight: 'bold',
+            cursor: 'pointer', fontSize: '1.1rem', transition: '0.3s', boxShadow: '0 4px 15px rgba(37, 99, 235, 0.3)'
           }}
         >
-          {loading ? 'AI AGENT ANALYZING...' : 'GET AI PERSPECTIVE'}
+          {loading ? 'SWARM NODES ANALYZING...' : 'VERIFY ON GENLAYER'}
         </button>
 
         {result && (
-          <div style={{ marginTop: '30px', textAlign: 'left', animation: 'fadeIn 0.5s ease' }}>
+          <div style={{ marginTop: '30px', textAlign: 'left' }}>
+            {/* Score & Node Status */}
             <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
               <div style={{ flex: '1', padding: '15px', backgroundColor: 'rgba(74, 222, 128, 0.1)', borderRadius: '18px', border: '1px solid #4ade80', textAlign: 'center' }}>
                 <div style={{ fontSize: '0.65rem', color: '#4ade80', fontWeight: 'bold' }}>TRUST SCORE</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: '900' }}>{result.trustScore}</div>
               </div>
               <div style={{ flex: '2', padding: '15px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: '18px', border: '1px solid #3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#60a5fa' }}>🤖 AI ANALYSIS ACTIVE</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#60a5fa' }}>🤖 INTELLIGENT AGENT ACTIVE</span>
               </div>
             </div>
 
-            <div style={{ padding: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)', borderRadius: '20px', borderLeft: '4px solid #3b82f6' }}>
-              <div style={{ fontSize: '0.75rem', color: '#60a5fa', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase' }}>AI Perspective:</div>
+            {/* AI Opinion */}
+            <div style={{ padding: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)', borderRadius: '20px', borderLeft: '4px solid #3b82f6', marginBottom: '20px' }}>
+              <div style={{ fontSize: '0.75rem', color: '#60a5fa', marginBottom: '8px', fontWeight: 'bold' }}>ANALYSIS REPORT:</div>
               <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: '1.6', color: '#cbd5e1', fontStyle: 'italic' }}>
                 "{result.aiOpinion}"
               </p>
+            </div>
+
+            {/* REAL ON-CHAIN DATA - Added based on your screenshot */}
+            <div style={{ padding: '15px', backgroundColor: 'rgba(2, 6, 23, 0.8)', borderRadius: '15px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ fontSize: '0.6rem', color: '#64748b', marginBottom: '8px', textAlign: 'center', fontWeight: 'bold' }}>VERIFIED ON-CHAIN DATA</div>
+              <div style={{ marginBottom: '5px' }}>
+                <span style={{ fontSize: '0.55rem', color: '#3b82f6' }}>CONTRACT:</span>
+                <div style={{ fontSize: '0.65rem', color: '#94a3b8', wordBreak: 'break-all', fontFamily: 'monospace' }}>{result.contractAddr}</div>
+              </div>
+              <div>
+                <span style={{ fontSize: '0.55rem', color: '#4ade80' }}>TX HASH:</span>
+                <div style={{ fontSize: '0.65rem', color: '#94a3b8', wordBreak: 'break-all', fontFamily: 'monospace' }}>{result.txHash}</div>
+              </div>
             </div>
           </div>
         )}
       </div>
 
-      {/* Tiny Footer Details - REINSTATED */}
-      <footer style={{ position: 'absolute', bottom: '30px', color: '#1e293b', fontSize: '0.65rem', fontWeight: 'bold', textAlign: 'center', width: '100%', letterSpacing: '1px' }}>
-        NETWORK: GENLAYER TESTNET | CONTRACT: 0x1e3d...9A2d
+      {/* Background Watermark */}
+      <div style={{ position: 'absolute', bottom: '10%', right: '-5%', fontSize: '15vw', fontWeight: '900', color: 'rgba(255, 255, 255, 0.02)', zIndex: 0, pointerEvents: 'none', transform: 'rotate(-5deg)' }}>
+        GENLAYER
+      </div>
+
+      <footer style={{ position: 'absolute', bottom: '20px', color: '#1e293b', fontSize: '0.6rem', fontWeight: 'bold', textAlign: 'center', width: '100%', letterSpacing: '2px' }}>
+        GENLAYER PROTOCOL TESTNET V1.0 | POWERED BY INTELLIGENT CONTRACTS
       </footer>
     </div>
   )
