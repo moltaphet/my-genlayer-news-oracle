@@ -1,4 +1,3 @@
-```text
 # 📰 GenLayer News Oracle
 
 A decentralized News Verification Oracle built on the **GenLayer Intelligent Trust Network**. This dApp allows users to verify the authenticity of news headlines using decentralized AI consensus.
@@ -23,6 +22,7 @@ In an era of misinformation, the **GenLayer News Oracle** provides a trustless l
 To run this project locally, follow these steps:
 
 1. **Clone the repository:**
+
 ```bash
 git clone [https://github.com/moltaphet/my-genlayer-news-oracle.git](https://github.com/moltaphet/my-genlayer-news-oracle.git)
 
@@ -61,7 +61,3 @@ https://my-genlayer-news-oracle-gh11xpfa8-moltaphets-projects.vercel.app/
 ## 📄 License
 
 This project is open-source and available under the MIT License.
-
-```
-
-```
