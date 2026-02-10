@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 
-// تعریف ساختار داده برای جلوگیری از خطاهای قبلی
+// Defined data structure to prevent Build errors shown in your logs
 interface AnalysisResult {
   trustScore: string;
   aiOpinion: string;
@@ -14,7 +14,7 @@ function App() {
   useEffect(() => {
     document.body.style.backgroundColor = '#020617';
     document.body.style.margin = '0';
-    document.body.style.direction = 'rtl'; // راست‌چین کردن کل صفحه
+    document.body.style.overflowX = 'hidden';
   }, []);
 
   const handleAnalyze = () => {
@@ -22,18 +22,18 @@ function App() {
     setResult(null)
     setTimeout(() => {
       setResult({
-        trustScore: "۸۸ از ۱۰۰",
-        aiOpinion: "تحلیل فعلی نشان‌دهنده تراکم بالای واقعیت است. با این حال، چارچوب زبانی متن به گونه‌ای استراتژیک برای ایجاد فوریت طراحی شده است. به عنوان یک تحلیلگر هوش مصنوعی، توصیه می‌کنم برای اطمینان از بی‌طرفی، منابع اولیه را مجدداً بررسی کنید."
+        trustScore: "88/100",
+        aiOpinion: "Current analysis indicates a high factual density. However, the linguistic framing is strategically designed to provoke urgency. As an AI analyst, I recommend cross-referencing this with primary sources to ensure neutral reporting."
       })
       setLoading(false)
     }, 2500)
   }
 
   return (
-    <div style={{ backgroundColor: '#020617', color: '#e2e8f0', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'tahoma, arial', padding: '20px' }}>
+    <div style={{ backgroundColor: '#020617', color: '#e2e8f0', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', padding: '20px' }}>
       
-      {/* لینک‌های اجتماعی */}
-      <div style={{ position: 'absolute', top: '30px', left: '30px', display: 'flex', gap: '20px', zIndex: 100 }}>
+      {/* Social Icons */}
+      <div style={{ position: 'absolute', top: '30px', right: '30px', display: 'flex', gap: '20px', zIndex: 100 }}>
         <a href="https://x.com/0xehs4hn" target="_blank" rel="noreferrer" style={{ opacity: 0.6 }}>
           <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         </a>
@@ -42,15 +42,16 @@ function App() {
         </a>
       </div>
 
+      {/* Subtle Background Branding */}
       <div style={{ position: 'fixed', fontSize: '10vw', fontWeight: '900', color: 'rgba(255, 255, 255, 0.02)', zIndex: 0, pointerEvents: 'none' }}>GENLAYER</div>
 
-      {/* رابط کاربری اصلی */}
-      <div style={{ position: 'relative', zIndex: 1, maxWidth: '600px', width: '100%', backgroundColor: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(12px)', padding: '40px', borderRadius: '35px', border: '1px solid rgba(59, 130, 246, 0.3)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)', boxSizing: 'border-box', textAlign: 'right' }}>
-        <h2 style={{ color: '#60a5fa', textAlign: 'center', margin: '0 0 25px 0', letterSpacing: '1px', fontWeight: '900' }}>اوراکل خبری هوشمند</h2>
+      {/* Main Interface */}
+      <div style={{ position: 'relative', zIndex: 1, maxWidth: '600px', width: '100%', backgroundColor: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(12px)', padding: '40px', borderRadius: '35px', border: '1px solid rgba(59, 130, 246, 0.3)', boxShadow: '0 25px 50px rgba(0,0,0,0.5)', boxSizing: 'border-box' }}>
+        <h2 style={{ color: '#60a5fa', textAlign: 'center', margin: '0 0 25px 0', letterSpacing: '2px', fontWeight: '900' }}>AI NEWS ORACLE</h2>
         
         <textarea 
-          style={{ width: '100%', height: '140px', backgroundColor: '#020617', color: 'white', border: '1px solid #1e293b', borderRadius: '20px', padding: '20px', marginBottom: '20px', outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit', textAlign: 'right', direction: 'rtl' }}
-          placeholder="متن خبر یا لینک را جهت تحلیل عمیق وارد کنید..."
+          style={{ width: '100%', height: '140px', backgroundColor: '#020617', color: 'white', border: '1px solid #1e293b', borderRadius: '20px', padding: '20px', marginBottom: '20px', outline: 'none', resize: 'none', boxSizing: 'border-box' }}
+          placeholder="Paste news content or URL here for deep AI analysis..."
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
@@ -58,31 +59,31 @@ function App() {
         <button 
           onClick={handleAnalyze}
           disabled={loading || !text}
-          style={{ width: '100%', padding: '18px', backgroundColor: loading ? '#1e293b' : '#2563eb', color: 'white', border: 'none', borderRadius: '18px', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s', fontSize: '1.1rem' }}
+          style={{ width: '100%', padding: '18px', backgroundColor: loading ? '#1e293b' : '#2563eb', color: 'white', border: 'none', borderRadius: '18px', fontWeight: 'bold', cursor: 'pointer', transition: '0.3s' }}
         >
-          {loading ? 'در حال تحلیل توسط هوش مصنوعی...' : 'شروع تحلیل هوشمند'}
+          {loading ? 'AI AGENT ANALYZING...' : 'GET AI PERSPECTIVE'}
         </button>
 
         {result && (
-          <div style={{ marginTop: '30px', direction: 'rtl' }}>
+          <div style={{ marginTop: '30px' }}>
             <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
               
-              {/* بخش امتیاز اعتماد */}
+              {/* Trust Score Section */}
               <div style={{ flex: '1', padding: '15px', backgroundColor: 'rgba(74, 222, 128, 0.1)', borderRadius: '18px', border: '1px solid #4ade80', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.7rem', color: '#4ade80', fontWeight: 'bold' }}>امتیاز اعتماد</div>
+                <div style={{ fontSize: '0.65rem', color: '#4ade80', fontWeight: 'bold' }}>TRUST SCORE</div>
                 <div style={{ fontSize: '1.4rem', fontWeight: '900' }}>{result.trustScore}</div>
               </div>
 
-              {/* بخش وضعیت */}
+              {/* Status Section */}
               <div style={{ flex: '2', padding: '15px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: '18px', border: '1px solid #3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#60a5fa' }}>🤖 تحلیلگر فعال است</span>
+                <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#60a5fa' }}>🤖 AI ANALYSIS ACTIVE</span>
               </div>
             </div>
 
-            {/* بخش دیدگاه هوش مصنوعی */}
-            <div style={{ padding: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)', borderRadius: '20px', borderRight: '4px solid #3b82f6' }}>
-              <div style={{ fontSize: '0.8rem', color: '#60a5fa', marginBottom: '8px', fontWeight: 'bold' }}>دیدگاه و تحلیل هوش مصنوعی:</div>
-              <p style={{ margin: 0, fontSize: '0.95rem', lineHeight: '1.8', color: '#cbd5e1', fontStyle: 'italic' }}>
+            {/* AI Perspective Section */}
+            <div style={{ padding: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)', borderRadius: '20px', borderLeft: '4px solid #3b82f6' }}>
+              <div style={{ fontSize: '0.75rem', color: '#60a5fa', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase' }}>AI Perspective:</div>
+              <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: '1.6', color: '#cbd5e1', fontStyle: 'italic' }}>
                 "{result.aiOpinion}"
               </p>
             </div>
@@ -90,9 +91,9 @@ function App() {
         )}
       </div>
 
-      {/* فوتر */}
-      <footer style={{ position: 'absolute', bottom: '20px', color: '#1e293b', fontSize: '0.7rem', fontWeight: 'bold', left: '50%', transform: 'translateX(-50%)' }}>
-        شبکه تست‌نت GENLAYER | امنیت تضمین شده
+      {/* Footer Details */}
+      <footer style={{ position: 'absolute', bottom: '20px', color: '#1e293b', fontSize: '0.6rem', fontWeight: 'bold' }}>
+        GENLAYER TESTNET | NETWORK SECURED
       </footer>
     </div>
   )
