@@ -44,8 +44,7 @@ npm run dev
 
 ## 🌐 Live Demo
 
-The project is live and accessible at:
-https://my-genlayer-news-oracle-gh11xpfa8-moltaphets-projects.vercel.app/
+The project is live and accessible at: 🔗 [Click here to view the Live Site](https://my-genlayer-news-oracle-gh11xpfa8-moltaphets-projects.vercel.app/)
 
 ---
 
