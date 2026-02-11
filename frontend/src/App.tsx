@@ -1,11 +1,4 @@
 import React, { useState } from 'react';
-import { createClient, http } from "genlayer-js";
-
-// 1. Client Configuration for GenLayer Asimov
-const client = createClient({
-  chain: "asimov" as any,
-  transport: http("https://rpc.asimov.genlayer.com"),
-});
 
 export default function App() {
   const [account, setAccount] = useState<string | null>(null);
@@ -13,21 +6,16 @@ export default function App() {
   const [status, setStatus] = useState<string>("Ready to verify");
   const [blockInfo, setBlockInfo] = useState<string>("---");
 
-  // 2. Connect Wallet Function
+  // 1. Connect Wallet & Switch Network
   const connectWallet = async () => {
     const eth = (window as any).ethereum;
-    if (!eth) {
-      alert("Please install MetaMask!");
-      return;
-    }
+    if (!eth) return alert("Please install MetaMask!");
 
     setLoading(true);
     try {
-      const accounts = await eth.request({ 
-        method: "eth_requestAccounts" 
-      });
+      const accounts = await eth.request({ method: "eth_requestAccounts" });
       
-      // Automatic Network Switch
+      // Auto-switch to Asimov Testnet
       await eth.request({
         method: 'wallet_addEthereumChain',
         params: [{
@@ -35,30 +23,38 @@ export default function App() {
           chainName: 'GenLayer Asimov',
           rpcUrls: ['https://rpc.asimov.genlayer.com'],
           nativeCurrency: { name: 'GEN', symbol: 'GEN', decimals: 18 },
-          blockExplorerUrls: ['https://explorer.asimov.genlayer.com']
         }]
       });
 
       setAccount(accounts[0]);
       setStatus("Connected to Asimov");
-    } catch (err: any) {
-      console.error(err);
+    } catch (err) {
       setStatus("Connection Failed");
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. Sync Blockchain Data
+  // 2. Fetch Block Number via direct JSON-RPC (No more 'http' or 'transport' errors)
   const syncBlockchain = async () => {
     setLoading(true);
-    setStatus("Syncing with GenVM...");
+    setStatus("Fetching block...");
     try {
-      const currentBlock = await client.getBlockNumber();
-      setBlockInfo(currentBlock.toString());
+      const response = await fetch("https://rpc.asimov.genlayer.com", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          method: "eth_blockNumber",
+          params: [],
+          id: 1,
+        }),
+      });
+      const data = await response.json();
+      const hexBlock = data.result;
+      setBlockInfo(parseInt(hexBlock, 16).toString());
       setStatus("Blockchain Data Synced");
-    } catch (err: any) {
-      console.error(err);
+    } catch (err) {
       setStatus("Sync Failed");
     } finally {
       setLoading(false);
@@ -121,26 +117,9 @@ export default function App() {
   );
 }
 
-// --- Styles (Fixed for TypeScript) ---
 const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    background: '#020617',
-    minHeight: '100vh',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'sans-serif',
-    color: '#f8fafc'
-  },
-  card: {
-    background: '#0f172a',
-    padding: '40px',
-    borderRadius: '24px',
-    border: '1px solid #1e293b',
-    width: '380px',
-    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
-    textAlign: 'center'
-  },
+  container: { background: '#020617', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', color: '#f8fafc' },
+  card: { background: '#0f172a', padding: '40px', borderRadius: '24px', border: '1px solid #1e293b', width: '380px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)', textAlign: 'center' },
   header: { marginBottom: '30px' },
   title: { fontSize: '20px', fontWeight: '900', letterSpacing: '4px', margin: '0' },
   badge: { display: 'inline-block', fontSize: '9px', background: '#3b82f6', padding: '2px 8px', borderRadius: '4px', marginTop: '5px', fontWeight: 'bold' },
