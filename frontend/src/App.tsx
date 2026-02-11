@@ -1,119 +1,244 @@
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react';
+import { createClient, http } from "genlayer-js";
 
-interface AnalysisResult {
-  trustScore: string;
-  aiOpinion: string;
-}
+/**
+ * GENLAYER ORACLE DASHBOARD - FINAL VERSION
+ * Features: MetaMask Integration, Network Auto-Switch, UI Feedback
+ */
 
-function App() {
-  const [text, setText] = useState('')
-  const [result, setResult] = useState<AnalysisResult | null>(null)
-  const [loading, setLoading] = useState(false)
+// 1. Client Configuration (Asimov Testnet)
+const client = createClient({
+  chain: "asimov",
+  transport: http("https://rpc.asimov.genlayer.com"),
+});
 
-  useEffect(() => {
-    document.body.style.backgroundColor = '#020617';
-    document.body.style.margin = '0';
-    document.body.style.overflow = 'hidden';
-  }, []);
+export default function App() {
+  const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("Ready to verify");
+  const [blockInfo, setBlockInfo] = useState("---");
 
-  const handleAnalyze = () => {
-    setLoading(true)
-    setResult(null)
-    setTimeout(() => {
-      setResult({
-        trustScore: "88/100",
-        aiOpinion: "Current analysis indicates high factual consistency. However, the framing suggests a strategic narrative focus. Cross-referencing with primary source data is advised for full neutrality."
-      })
-      setLoading(false)
-    }, 2500)
-  }
+  // 2. Connect Wallet & Auto-Switch to Asimov Network
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("MetaMask not found! Please install the extension.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      
+      // Request Network Switch to Asimov (Chain ID: 4200)
+      await window.ethereum.request({
+        method: 'wallet_addEthereumChain',
+        params: [{
+          chainId: '0x1068',
+          chainName: 'GenLayer Asimov',
+          rpcUrls: ['https://rpc.asimov.genlayer.com'],
+          nativeCurrency: { name: 'GEN', symbol: 'GEN', decimals: 18 },
+          blockExplorerUrls: ['https://explorer.asimov.genlayer.com']
+        }]
+      });
+
+      setAccount(accounts[0]);
+      setStatus("Connected to Asimov");
+    } catch (err) {
+      console.error("Connection Error:", err);
+      setStatus("Connection Failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 3. Sync Blockchain Data (Live Block Number)
+  const syncBlockchain = async () => {
+    setLoading(true);
+    setStatus("Syncing with GenVM...");
+    try {
+      const currentBlock = await client.getBlockNumber();
+      setBlockInfo(currentBlock.toString());
+      setStatus("Blockchain Data Synced");
+    } catch (err) {
+      console.error("Sync Error:", err);
+      setStatus("Sync Failed - Check RPC");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div style={{
-      backgroundColor: '#020617', color: '#e2e8f0', 
-      height: '100vh', width: '100vw',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: 'sans-serif', position: 'fixed', top: 0, left: 0
-    }}>
-      
-      {/* Social Links - Top Right */}
-      <div style={{ position: 'absolute', top: '30px', right: '30px', display: 'flex', gap: '20px', zIndex: 100 }}>
-        <a href="https://x.com/0xehs4hn" target="_blank" rel="noreferrer" style={{ opacity: 0.6 }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        </a>
-        <a href="https://github.com/moltaphet/my-genlayer-news-oracle" target="_blank" rel="noreferrer" style={{ opacity: 0.6 }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-        </a>
-      </div>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        {/* Header Section */}
+        <header style={styles.header}>
+          <h1 style={styles.title}>GENLAYER ORACLE</h1>
+          <div style={styles.badge}>AI-VERIFIED</div>
+        </header>
 
-      {/* Large Background Watermark */}
-      <div style={{ position: 'absolute', fontSize: '10vw', fontWeight: '900', color: 'rgba(255, 255, 255, 0.02)', zIndex: 0, pointerEvents: 'none', userSelect: 'none' }}>
-        GENLAYER
-      </div>
+        {/* Wallet Connection Area */}
+        <div style={styles.walletArea}>
+          {!account ? (
+            <button onClick={connectWallet} disabled={loading} style={styles.connectBtn}>
+              {loading ? "INITIALIZING..." : "CONNECT WALLET"}
+            </button>
+          ) : (
+            <div style={styles.accountDisplay}>
+              <span style={styles.onlineDot}></span>
+              {account.substring(0, 6)}...{account.substring(38)}
+            </div>
+          )}
+        </div>
 
-      {/* Main Container */}
-      <div style={{
-        position: 'relative', zIndex: 1, maxWidth: '580px', width: '90%', 
-        backgroundColor: 'rgba(15, 23, 42, 0.9)', backdropFilter: 'blur(15px)',
-        padding: '45px', borderRadius: '40px', 
-        border: '1px solid rgba(59, 130, 246, 0.3)',
-        boxShadow: '0 0 100px rgba(0, 0, 0, 0.8)',
-        textAlign: 'center', boxSizing: 'border-box'
-      }}>
-        <h2 style={{ color: '#60a5fa', fontSize: '2.2rem', margin: '0 0 5px 0', fontWeight: '900', letterSpacing: '2px' }}>AI NEWS ORACLE</h2>
-        <p style={{ color: '#475569', marginBottom: '30px', fontSize: '0.7rem', letterSpacing: '4px', fontWeight: 'bold' }}>INTELLIGENT VERIFICATION</p>
-        
-        <textarea 
-          style={{
-            width: '100%', height: '140px', backgroundColor: '#020617', color: 'white',
-            border: '1px solid rgba(255,255,255,0.1)', borderRadius: '25px', padding: '20px',
-            fontSize: '1rem', outline: 'none', marginBottom: '20px', resize: 'none', boxSizing: 'border-box'
-          }}
-          placeholder="Paste news content here..."
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
+        {/* Information Display */}
+        <div style={styles.displayScreen}>
+          <div style={styles.statusText}>{status}</div>
+          <div style={styles.blockRow}>
+            <span style={{color: '#64748b'}}>LATEST BLOCK:</span>
+            <span style={{color: '#3b82f6', fontWeight: 'bold'}}> {blockInfo}</span>
+          </div>
+        </div>
 
+        {/* Main Action Button */}
         <button 
-          onClick={handleAnalyze}
-          disabled={loading || !text}
+          onClick={syncBlockchain} 
+          disabled={!account || loading} 
           style={{
-            width: '100%', padding: '18px', backgroundColor: loading ? '#1e293b' : '#2563eb',
-            color: 'white', border: 'none', borderRadius: '20px', fontWeight: 'bold',
-            cursor: 'pointer', fontSize: '1.1rem', transition: '0.3s'
+            ...styles.actionBtn,
+            opacity: (!account || loading) ? 0.6 : 1,
+            cursor: (!account || loading) ? 'not-allowed' : 'pointer'
           }}
         >
-          {loading ? 'AI AGENT ANALYZING...' : 'GET AI PERSPECTIVE'}
+          {loading ? "PROCESSING..." : "RUN ORACLE SYNC"}
         </button>
 
-        {result && (
-          <div style={{ marginTop: '30px', textAlign: 'left', animation: 'fadeIn 0.5s ease' }}>
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '15px' }}>
-              <div style={{ flex: '1', padding: '15px', backgroundColor: 'rgba(74, 222, 128, 0.1)', borderRadius: '18px', border: '1px solid #4ade80', textAlign: 'center' }}>
-                <div style={{ fontSize: '0.65rem', color: '#4ade80', fontWeight: 'bold' }}>TRUST SCORE</div>
-                <div style={{ fontSize: '1.4rem', fontWeight: '900' }}>{result.trustScore}</div>
-              </div>
-              <div style={{ flex: '2', padding: '15px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: '18px', border: '1px solid #3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#60a5fa' }}>🤖 AI ANALYSIS ACTIVE</span>
-              </div>
-            </div>
-
-            <div style={{ padding: '20px', backgroundColor: 'rgba(0, 0, 0, 0.2)', borderRadius: '20px', borderLeft: '4px solid #3b82f6' }}>
-              <div style={{ fontSize: '0.75rem', color: '#60a5fa', marginBottom: '8px', fontWeight: 'bold', textTransform: 'uppercase' }}>AI Perspective:</div>
-              <p style={{ margin: 0, fontSize: '0.92rem', lineHeight: '1.6', color: '#cbd5e1', fontStyle: 'italic' }}>
-                "{result.aiOpinion}"
-              </p>
-            </div>
+        {/* Technical Footer */}
+        <footer style={styles.footer}>
+          <div style={styles.footerItem}>
+            <small>NETWORK</small>
+            <span>ASIMOV-TESTNET</span>
           </div>
-        )}
+          <div style={styles.footerItem}>
+            <small>PROVIDER</small>
+            <span>GENLAYER RPC</span>
+          </div>
+        </footer>
       </div>
-
-      {/* Tiny Footer Details - REINSTATED */}
-      <footer style={{ position: 'absolute', bottom: '30px', color: '#1e293b', fontSize: '0.65rem', fontWeight: 'bold', textAlign: 'center', width: '100%', letterSpacing: '1px' }}>
-        NETWORK: GENLAYER TESTNET | CONTRACT: 0x1e3d...9A2d
-      </footer>
     </div>
-  )
+  );
 }
 
-export default App
+// --- Professional UI Styles ---
+const styles = {
+  container: {
+    background: '#020617',
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: '"Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    color: '#f8fafc'
+  },
+  card: {
+    background: '#0f172a',
+    padding: '40px',
+    borderRadius: '24px',
+    border: '1px solid #1e293b',
+    width: '400px',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+    textAlign: 'center'
+  },
+  header: {
+    marginBottom: '30px'
+  },
+  title: {
+    fontSize: '22px',
+    fontWeight: '900',
+    letterSpacing: '4px',
+    margin: '0',
+    color: '#ffffff'
+  },
+  badge: {
+    display: 'inline-block',
+    fontSize: '10px',
+    background: '#3b82f6',
+    padding: '2px 8px',
+    borderRadius: '4px',
+    marginTop: '5px',
+    fontWeight: 'bold'
+  },
+  walletArea: {
+    marginBottom: '20px'
+  },
+  connectBtn: {
+    width: '100%',
+    padding: '14px',
+    borderRadius: '12px',
+    border: 'none',
+    background: '#2563eb',
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: '14px',
+    cursor: 'pointer',
+    transition: '0.2s ease'
+  },
+  accountDisplay: {
+    background: '#1e293b',
+    padding: '12px',
+    borderRadius: '12px',
+    fontSize: '13px',
+    color: '#94a3b8',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '10px',
+    border: '1px dashed #334155'
+  },
+  onlineDot: {
+    width: '8px',
+    height: '8px',
+    background: '#22c55e',
+    borderRadius: '50%',
+    boxShadow: '0 0 10px #22c55e'
+  },
+  displayScreen: {
+    background: '#020617',
+    padding: '20px',
+    borderRadius: '12px',
+    marginBottom: '25px',
+    textAlign: 'left',
+    border: '1px solid #1e293b'
+  },
+  statusText: {
+    fontSize: '14px',
+    color: '#cbd5e1',
+    marginBottom: '10px'
+  },
+  blockRow: {
+    fontSize: '12px',
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  actionBtn: {
+    width: '100%',
+    padding: '16px',
+    borderRadius: '12px',
+    border: 'none',
+    background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: '15px',
+    boxShadow: '0 10px 15px -3px rgba(59, 130, 246, 0.3)'
+  },
+  footer: {
+    marginTop: '30px',
+    paddingTop: '20px',
+    borderTop: '1px solid #1e293b',
+    display: 'flex',
+    justifyContent: 'space-between'
+  },
+  footerItem: {
+    textAlign: 'left',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',

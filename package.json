@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "genlayer-js": "github:genlayerlabs/genlayer-js"
+  },
+  "type": "module"
+}
