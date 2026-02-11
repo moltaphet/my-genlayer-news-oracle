@@ -3,43 +3,31 @@ import React, { useState } from 'react';
 export default function App() {
   const [account, setAccount] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [status, setStatus] = useState<string>("Ready to verify");
+  const [status, setStatus] = useState<string>("System Ready");
   const [blockInfo, setBlockInfo] = useState<string>("---");
 
-  // 1. Connect Wallet & Switch Network
   const connectWallet = async () => {
     const eth = (window as any).ethereum;
     if (!eth) return alert("Please install MetaMask!");
 
     setLoading(true);
+    setStatus("Connecting...");
     try {
       const accounts = await eth.request({ method: "eth_requestAccounts" });
-      
-      // Auto-switch to Asimov Testnet
-      await eth.request({
-        method: 'wallet_addEthereumChain',
-        params: [{
-          chainId: '0x1068',
-          chainName: 'GenLayer Asimov',
-          rpcUrls: ['https://rpc.asimov.genlayer.com'],
-          nativeCurrency: { name: 'GEN', symbol: 'GEN', decimals: 18 },
-        }]
-      });
-
       setAccount(accounts[0]);
-      setStatus("Connected to Asimov");
+      setStatus("Wallet Connected");
     } catch (err) {
-      setStatus("Connection Failed");
+      setStatus("Connection Denied");
     } finally {
       setLoading(false);
     }
   };
 
-  // 2. Fetch Block Number via direct JSON-RPC (No more 'http' or 'transport' errors)
   const syncBlockchain = async () => {
     setLoading(true);
-    setStatus("Fetching block...");
+    setStatus("Fetching Data...");
     try {
+      // Direct Fetch to RPC
       const response = await fetch("https://rpc.asimov.genlayer.com", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -51,66 +39,57 @@ export default function App() {
         }),
       });
       const data = await response.json();
-      const hexBlock = data.result;
-      setBlockInfo(parseInt(hexBlock, 16).toString());
-      setStatus("Blockchain Data Synced");
+      if (data.result) {
+        setBlockInfo(parseInt(data.result, 16).toString());
+        setStatus("Live Data Synced");
+      } else {
+        setStatus("RPC Busy");
+      }
     } catch (err) {
-      setStatus("Sync Failed");
+      setStatus("Sync Error");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div style={styles.container}>
+    <div style={styles.fullPage}>
       <div style={styles.card}>
         <header style={styles.header}>
           <h1 style={styles.title}>GENLAYER ORACLE</h1>
-          <div style={styles.badge}>AI-VERIFIED</div>
+          <div style={styles.badge}>v1.0 ASIMOV</div>
         </header>
 
-        <div style={styles.walletArea}>
+        <div style={styles.content}>
           {!account ? (
-            <button onClick={connectWallet} disabled={loading} style={styles.connectBtn}>
-              {loading ? "INITIALIZING..." : "CONNECT WALLET"}
+            <button onClick={connectWallet} disabled={loading} style={styles.primaryBtn}>
+              {loading ? "CHECKING..." : "CONNECT WALLET"}
             </button>
           ) : (
-            <div style={styles.accountDisplay}>
-              <span style={styles.onlineDot}></span>
-              {account.substring(0, 6)}...{account.substring(38)}
+            <div style={styles.infoBox}>
+              <div style={styles.statusRow}>
+                <span style={styles.dot}></span>
+                <span>ID: {account.substring(0, 6)}...{account.substring(38)}</span>
+              </div>
             </div>
           )}
-        </div>
 
-        <div style={styles.displayScreen}>
-          <div style={styles.statusText}>{status}</div>
-          <div style={styles.blockRow}>
-            <span style={{color: '#64748b'}}>LATEST BLOCK:</span>
-            <span style={{color: '#3b82f6', fontWeight: 'bold'}}> {blockInfo}</span>
+          <div style={styles.display}>
+            <div style={styles.displayText}>STATUS: <span style={{color:'#60a5fa'}}>{status}</span></div>
+            <div style={styles.displayText}>LATEST BLOCK: <span style={{color:'#60a5fa'}}>{blockInfo}</span></div>
           </div>
-        </div>
 
-        <button 
-          onClick={syncBlockchain} 
-          disabled={!account || loading} 
-          style={{
-            ...styles.actionBtn,
-            opacity: (!account || loading) ? 0.6 : 1,
-            cursor: (!account || loading) ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {loading ? "PROCESSING..." : "RUN ORACLE SYNC"}
-        </button>
+          <button 
+            onClick={syncBlockchain} 
+            disabled={!account || loading} 
+            style={{...styles.syncBtn, opacity: account ? 1 : 0.5}}
+          >
+            {loading ? "SYNCING..." : "RUN ORACLE SYNC"}
+          </button>
+        </div>
 
         <footer style={styles.footer}>
-          <div style={styles.footerItem}>
-            <small>NETWORK</small>
-            <span>ASIMOV-TESTNET</span>
-          </div>
-          <div style={styles.footerItem}>
-            <small>STATUS</small>
-            <span>ACTIVE</span>
-          </div>
+          <span>NETWORK: ASIMOV TESTNET</span>
         </footer>
       </div>
     </div>
@@ -118,19 +97,18 @@ export default function App() {
 }
 
 const styles: { [key: string]: React.CSSProperties } = {
-  container: { background: '#020617', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', color: '#f8fafc' },
-  card: { background: '#0f172a', padding: '40px', borderRadius: '24px', border: '1px solid #1e293b', width: '380px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)', textAlign: 'center' },
+  fullPage: { width: '100vw', height: '100vh', background: '#020617', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0, padding: 0, position: 'fixed', top: 0, left: 0 },
+  card: { background: '#0f172a', padding: '40px', borderRadius: '24px', border: '1px solid #1e293b', width: '360px', textAlign: 'center', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' },
   header: { marginBottom: '30px' },
-  title: { fontSize: '20px', fontWeight: '900', letterSpacing: '4px', margin: '0' },
-  badge: { display: 'inline-block', fontSize: '9px', background: '#3b82f6', padding: '2px 8px', borderRadius: '4px', marginTop: '5px', fontWeight: 'bold' },
-  walletArea: { marginBottom: '20px' },
-  connectBtn: { width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#2563eb', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
-  accountDisplay: { background: '#1e293b', padding: '12px', borderRadius: '12px', fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px dashed #334155' },
-  onlineDot: { width: '8px', height: '8px', background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' },
-  displayScreen: { background: '#020617', padding: '18px', borderRadius: '12px', marginBottom: '20px', textAlign: 'left', border: '1px solid #1e293b' },
-  statusText: { fontSize: '13px', color: '#cbd5e1', marginBottom: '8px' },
-  blockRow: { fontSize: '11px', display: 'flex', justifyContent: 'space-between' },
-  actionBtn: { width: '100%', padding: '16px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
-  footer: { marginTop: '25px', paddingTop: '15px', borderTop: '1px solid #1e293b', display: 'flex', justifyContent: 'space-between' },
-  footerItem: { textAlign: 'left', display: 'flex', flexDirection: 'column', fontSize: '9px', color: '#475569' }
+  title: { fontSize: '20px', fontWeight: 'bold', letterSpacing: '3px', color: 'white', margin: 0 },
+  badge: { display: 'inline-block', fontSize: '9px', background: '#2563eb', padding: '2px 10px', borderRadius: '4px', marginTop: '8px', color: 'white' },
+  content: { display: 'flex', flexDirection: 'column', gap: '15px' },
+  primaryBtn: { padding: '14px', borderRadius: '12px', border: 'none', background: '#2563eb', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
+  infoBox: { background: '#1e293b', padding: '12px', borderRadius: '12px', border: '1px dashed #334155' },
+  statusRow: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontSize: '12px', color: '#94a3b8' },
+  dot: { width: '8px', height: '8px', background: '#22c55e', borderRadius: '50%' },
+  display: { background: '#020617', padding: '15px', borderRadius: '12px', textAlign: 'left', border: '1px solid #1e293b' },
+  displayText: { fontSize: '12px', color: '#64748b', margin: '4px 0' },
+  syncBtn: { padding: '16px', borderRadius: '12px', border: 'none', background: 'linear-gradient(to right, #3b82f6, #8b5cf6)', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
+  footer: { marginTop: '25px', fontSize: '10px', color: '#475569', borderTop: '1px solid #1e293b', paddingTop: '15px' }
 };
