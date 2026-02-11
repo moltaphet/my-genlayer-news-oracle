@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { createClient, http } from "genlayer-js";
 
-// 1. Client Configuration
+// 1. Client Configuration for GenLayer Asimov
 const client = createClient({
   chain: "asimov" as any,
   transport: http("https://rpc.asimov.genlayer.com"),
@@ -13,20 +13,22 @@ export default function App() {
   const [status, setStatus] = useState<string>("Ready to verify");
   const [blockInfo, setBlockInfo] = useState<string>("---");
 
-  // 2. Connect Wallet
+  // 2. Connect Wallet Function
   const connectWallet = async () => {
-    if (!(window as any).ethereum) {
+    const eth = (window as any).ethereum;
+    if (!eth) {
       alert("Please install MetaMask!");
       return;
     }
 
     setLoading(true);
     try {
-      const accounts = await (window as any).ethereum.request({ 
+      const accounts = await eth.request({ 
         method: "eth_requestAccounts" 
       });
       
-      await (window as any).ethereum.request({
+      // Automatic Network Switch
+      await eth.request({
         method: 'wallet_addEthereumChain',
         params: [{
           chainId: '0x1068',
@@ -39,7 +41,7 @@ export default function App() {
 
       setAccount(accounts[0]);
       setStatus("Connected to Asimov");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setStatus("Connection Failed");
     } finally {
@@ -47,7 +49,7 @@ export default function App() {
     }
   };
 
-  // 3. Sync Logic
+  // 3. Sync Blockchain Data
   const syncBlockchain = async () => {
     setLoading(true);
     setStatus("Syncing with GenVM...");
@@ -55,7 +57,7 @@ export default function App() {
       const currentBlock = await client.getBlockNumber();
       setBlockInfo(currentBlock.toString());
       setStatus("Blockchain Data Synced");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setStatus("Sync Failed");
     } finally {
@@ -119,17 +121,33 @@ export default function App() {
   );
 }
 
-// --- Styles (CSS Objects) ---
+// --- Styles (Fixed for TypeScript) ---
 const styles: { [key: string]: React.CSSProperties } = {
-  container: { background: '#020617', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'sans-serif', color: '#f8fafc' },
-  card: { background: '#0f172a', padding: '40px', borderRadius: '24px', border: '1px solid #1e293b', width: '380px', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)', textAlign: 'center' },
+  container: {
+    background: '#020617',
+    minHeight: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: 'sans-serif',
+    color: '#f8fafc'
+  },
+  card: {
+    background: '#0f172a',
+    padding: '40px',
+    borderRadius: '24px',
+    border: '1px solid #1e293b',
+    width: '380px',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
+    textAlign: 'center'
+  },
   header: { marginBottom: '30px' },
   title: { fontSize: '20px', fontWeight: '900', letterSpacing: '4px', margin: '0' },
   badge: { display: 'inline-block', fontSize: '9px', background: '#3b82f6', padding: '2px 8px', borderRadius: '4px', marginTop: '5px', fontWeight: 'bold' },
   walletArea: { marginBottom: '20px' },
   connectBtn: { width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: '#2563eb', color: 'white', fontWeight: 'bold', cursor: 'pointer' },
-  accountDisplay: { background: '#1e293b', padding: '12px', borderRadius: '12px', fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' },
-  onlineDot: { width: '8px', height: '8px', background: '#22c55e', borderRadius: '50%' },
+  accountDisplay: { background: '#1e293b', padding: '12px', borderRadius: '12px', fontSize: '12px', color: '#94a3b8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', border: '1px dashed #334155' },
+  onlineDot: { width: '8px', height: '8px', background: '#22c55e', borderRadius: '50%', boxShadow: '0 0 10px #22c55e' },
   displayScreen: { background: '#020617', padding: '18px', borderRadius: '12px', marginBottom: '20px', textAlign: 'left', border: '1px solid #1e293b' },
   statusText: { fontSize: '13px', color: '#cbd5e1', marginBottom: '8px' },
   blockRow: { fontSize: '11px', display: 'flex', justifyContent: 'space-between' },
